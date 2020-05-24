@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import entryService from './services/entries' 
 
 const Line = ( {name, number} ) => (
   <li>{name} {number}</li>
@@ -38,30 +38,29 @@ const App = () => {
   const handleNumberChange = (event) => setnewNumber(event.target.value)
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-      })
-  }, [])  
+      entryService
+        .getAll()
+        .then(initialPersons => {
+          setPersons(initialPersons.data)
+        })
+  })  
 
   const addEntry = (event) => {
     event.preventDefault()
     const entryObject = {
       name: newName,
-      number: newNumber
+      number: newNumber,
+      id: persons.length + 1
     }
-    
+
     if (persons.find(entry => entry.name === newName) === undefined) {
-      axios
-      .post('http://localhost:3001/persons', entryObject)
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(persons.concat(entryObject))
-        setnewName('')
-        setnewNumber('')
-      })
+      entryService
+        .create(entryObject)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson.data))
+          setnewName('')
+          setnewNumber('')
+        })
     } else {
       window.alert(`${entryObject.name} is already added to phonebook`)
     }
