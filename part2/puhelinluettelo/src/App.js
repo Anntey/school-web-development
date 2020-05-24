@@ -42,7 +42,6 @@ const App = () => {
     axios
       .get('http://localhost:3001/persons')
       .then(response => {
-        console.log('promise fulfilled')
         setPersons(response.data)
       })
   }, [])  
@@ -53,14 +52,19 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-
+    
     if (persons.find(entry => entry.name === newName) === undefined) {
-      setPersons(persons.concat(entryObject))
+      axios
+      .post('http://localhost:3001/persons', entryObject)
+      .then(response => {
+        console.log('promise fulfilled')
+        setPersons(persons.concat(entryObject))
+        setnewName('')
+        setnewNumber('')
+      })
     } else {
       window.alert(`${entryObject.name} is already added to phonebook`)
     }
-    setnewName('')
-    setnewNumber('')
   }
 
   return (
