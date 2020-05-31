@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import entryService from './services/entries' 
 
-const Line = ( {name, number} ) => (
-  <li>{name} {number}</li>
+const Line = ( {name, number, id, deleteCall} ) => (
+  <li>{name} {number} <button onClick={() => {deleteCall(id)}}>delete</button></li>
 )
 
-const Phonebook = ( {list} ) => {
+const Phonebook = ( {list, deleteCall} ) => {
   return(
     <ul>
       {list.map((entry, i) =>
-        <Line name={entry.name} number={entry.number} key={i} />
+        <Line
+          name={entry.name}
+          number={entry.number}
+          key={entry.id}
+          id={entry.id}
+          deleteCall={deleteCall}
+        />
       )}
     </ul>
   )  
@@ -49,11 +55,10 @@ const App = () => {
     event.preventDefault()
     const entryObject = {
       name: newName,
-      number: newNumber,
-      id: persons.length + 1
+      number: newNumber
     }
 
-    if (persons.find(entry => entry.name === newName) === undefined) {
+    if (persons.find(person => person.name === newName) === undefined) {
       entryService
         .create(entryObject)
         .then(returnedPerson => {
@@ -63,6 +68,18 @@ const App = () => {
         })
     } else {
       window.alert(`${entryObject.name} is already added to phonebook`)
+    }
+  }
+
+  const deleteEntry = (id) => {
+    let person = persons.find(person => person.id === id)
+    //console.log(`id: ${id} person: ${person}`)
+    if (window.confirm(`Poistetaanko ${person.name}?`)) {
+      entryService
+        .deletePerson(id)
+        .then(response => {
+          setPersons(persons.filter(person => person.id !== id))
+        })
     }
   }
 
@@ -77,7 +94,7 @@ const App = () => {
         numberHandler={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Phonebook list={persons} />
+      <Phonebook list={persons} deleteCall={deleteEntry} />
     </div>
   )
 }
